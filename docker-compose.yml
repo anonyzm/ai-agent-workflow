@@ -1,0 +1,143 @@
+services:
+# =============================== Jira ===============================
+  jira-nginx:
+    container_name: jira-nginx
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./docker/jira/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/jira/nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - ai-workflow-network
+
+  jira:
+    container_name: jira
+    image: atlassian/jira-software:9.12.9
+    restart: unless-stopped
+    volumes:
+      - ./docker/jira/data/var:/var/atlassian/application-data/jira
+      - ./docker/jira/data/opt:/opt/atlassian/jira
+      - ./docker/jira/data/activate:/opt/atlassian/atlassian-agent/
+    environment:
+      JIRA_DATABASE_URL: postgresql://${JIRA_DB_USER}@jira-postgres/${JIRA_DB_NAME}
+      JIRA_DB_PASSWORD: ${JIRA_DB_PASSWORD}
+      JVM_MINIMUM_MEMORY: 2048m
+      JVM_MAXIMUM_MEMORY: 4096m
+      ATL_PROXY_NAME: jira.workflow.local
+      ATL_PROXY_PORT: 443
+      ATL_TOMCAT_SCHEME: https
+      TZ: Europe/Moscow
+    networks:
+      - ai-workflow-network
+    depends_on:
+      - jira-postgres
+
+  jira-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${JIRA_DB_USER}
+      POSTGRES_PASSWORD: ${JIRA_DB_PASSWORD}
+      POSTGRES_DB: ${JIRA_DB_NAME}
+      PGDATA: /data/postgres
+    volumes:
+       - ./docker/jira/postgres/data:/data/postgres
+    # ports:
+    #   - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - ai-workflow-network
+
+# ============================= Temporal =============================
+
+  temporal-postgresql:
+    container_name: temporal-postgresql
+    environment:
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_USER}
+      POSTGRES_USER: ${TEMPORAL_DB_PASSWORD}
+    image: postgres:${TEMPORAL_POSTGRESQL_VERSION}
+    networks:
+      - temporal-network
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker/temporal/postgres/data:/var/lib/postgresql/data
+
+  temporal:
+    container_name: temporal
+    depends_on:
+      - temporal-postgresql
+    environment:
+      - DB=postgres
+      - DB_PORT=5432
+      - POSTGRES_USER=${TEMPORAL_DB_USER}
+      - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/auto-setup:${TEMPORAL_VERSION}
+    networks:
+      - temporal-network
+    ports:
+      - 7233:7233
+    volumes:
+      - ./docker/temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+
+  temporal-admin-tools:
+    container_name: temporal-admin-tools
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    networks:
+      - temporal-network
+    stdin_open: true
+    tty: true
+  temporal-ui:
+    container_name: temporal-ui
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    image: temporalio/ui:${TEMPORAL_UI_VERSION}
+    networks:
+      - temporal-network
+    ports:
+      - 8070:8080
+
+# =========================== Application ============================
+  init_permissions:
+    image: busybox 
+    volumes:
+      - logs_volume:/logs
+      - cache_volume:/cache
+    command: chmod -R 775 /logs && chmod -R 775 /cache
+  # PHP Application
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    ports:
+       - "8080:80"
+    volumes:
+      - ./app:/opt/app
+      - cache_volume:/opt/app/cache
+      - logs_volume:/opt/app/logs
+    depends_on:
+      - init_permissions
+    networks:
+      - ai-workflow-network
+      - temporal-network
+
+networks:
+  ai-workflow-network:
+  temporal-network:
+
+volumes:
+  cache_volume:    
+  logs_volume:

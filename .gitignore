@@ -1,0 +1,6 @@
+docker/jira/postgres/data/*
+docker/temporal/postgres/data/*
+app/cache/*
+app/logs/*
+app/vendor/*
+.env
