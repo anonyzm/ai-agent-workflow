@@ -4,3 +4,10 @@ jira_callback:
     methods: [POST]
     defaults:
         _format: json
+
+get_task:
+    path: /jira/gettask/{taskKey}
+    controller: App\Controller\JiraController::getTask
+    methods: [GET]
+    defaults:
+        _format: json

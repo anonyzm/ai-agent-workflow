@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./docker/jira/data/var:/var/atlassian/application-data/jira
-      - ./docker/jira/data/opt:/opt/atlassian/jira
+      - opt:/opt/atlassian/jira
       - ./docker/jira/data/activate:/opt/atlassian/atlassian-agent/
     environment:
       JIRA_DATABASE_URL: postgresql://${JIRA_DB_USER}@jira-postgres/${JIRA_DB_NAME}
@@ -128,6 +128,9 @@ services:
       - ./app:/opt/app
       - cache_volume:/opt/app/cache
       - logs_volume:/opt/app/logs
+    environment:
+      JIRA_BASE_URL: https://jira-nginx
+      JIRA_TOKEN: ${JIRA_TOKEN}
     depends_on:
       - init_permissions
     networks:
@@ -139,5 +142,7 @@ networks:
   temporal-network:
 
 volumes:
+  opt:
+    external: false
   cache_volume:    
   logs_volume:

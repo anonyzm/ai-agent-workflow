@@ -10,6 +10,22 @@ services:
     event_dispatcher:
         class: Symfony\Component\EventDispatcher\EventDispatcher
         public: true
+    
+    # Регистрируем все контроллеры как публичные сервисы
+    App\Controller\:
+        resource: '../src/Controller/'
+        public: true
+        tags: ['controller.service_arguments']
+
+    App\Service\:
+        resource: '../src/Service/'  
+
+    App\Interface\TaskTrackerInterface:
+        class: App\Service\JiraService
+        arguments:
+            - '%env(JIRA_BASE_URL)%'
+            - '%env(JIRA_TOKEN)%'
+            - '@logger'
 
     # Настройка Monolog
     monolog.logger:
@@ -36,20 +52,6 @@ services:
             - '%kernel.logs_dir%/error.log'
             - !php/const Monolog\Logger::ERROR
 
-    # monolog.handler.console:
-    #     class: Monolog\Handler\ConsoleHandler
-    #     arguments:
-    #         - !php/const Monolog\Logger::DEBUG
-
     # Явно регистрируем логгер как сервис
     Psr\Log\LoggerInterface: '@monolog.logger'        
-
-    # Регистрируем все контроллеры как публичные сервисы
-    App\Controller\:
-        resource: '../src/Controller/'
-        public: true
-        tags: ['controller.service_arguments']
-
-    # App\Service\:
-    #     resource: '../src/Service/'
     

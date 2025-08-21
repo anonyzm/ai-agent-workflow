@@ -6,15 +6,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
+use App\Interface\TaskTrackerInterface;
 
 class JiraController
 {
-    private $logger;
-
-    public function __construct(LoggerInterface $logger) 
-    {
-        $this->logger = $logger;
-    }
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly TaskTrackerInterface $trackerService
+    ) {}
 
     public function callback(Request $request): Response
     {       
@@ -30,5 +29,12 @@ class JiraController
             'message' => 'Thanks for callback',
             'timestamp' => date('Y-m-d H:i:s')
         ], 200);
+    }
+
+    public function getTask(Request $request): Response
+    {
+        $taskKey = $request->get('taskKey');
+        $task = $this->trackerService->getTask($taskKey);
+        return new JsonResponse($task);
     }
 }
