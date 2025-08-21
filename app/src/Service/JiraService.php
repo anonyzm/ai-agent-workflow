@@ -31,6 +31,26 @@ class JiraService implements TaskTrackerInterface
         return $this->get('/rest/api/latest/issue/' . $taskKey);
     }
 
+    public function createTask(array $taskData): array
+    {
+        return $this->post('/rest/api/latest/issue/', $taskData);
+    }
+
+    public function assignTask(string $taskKey, string $assignee): void
+    {
+        throw new TaskTrackerException('method not implemented yet');
+    }
+
+    public function addComment(string $taskKey, string $comment): void
+    {
+        throw new TaskTrackerException('method not implemented yet');
+    }
+
+    public function updateTask(string $taskKey, array $taskData): array
+    {
+        throw new TaskTrackerException('method not implemented yet');
+    }
+
     // -------------------------- private methods ----------------------------
 
     /**

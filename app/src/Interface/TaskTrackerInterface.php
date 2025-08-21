@@ -2,12 +2,16 @@
 
 namespace App\Interface;
 
-const TASK_STATUS_OPEN = 'open';
-const TASK_STATUS_IN_PROGRESS = 'in_progress';
-const TASK_STATUS_DONE = 'done';
-const TASK_STATUS_CANCELLED = 'cancelled';
-
 interface TaskTrackerInterface
 {
     public function getTask(string $taskKey): array;
+
+    public function createTask(array $taskData): array;
+
+    public function assignTask(string $taskKey, string $assignee): void;
+
+    public function addComment(string $taskKey, string $comment): void;
+
+    public function updateTask(string $taskKey, array $taskData): array;
+
 }

@@ -12,7 +12,7 @@ class JiraController
 {
     public function __construct(
         private readonly LoggerInterface $logger,
-        private readonly TaskTrackerInterface $trackerService
+        private readonly TaskRouterInterface $routerService
     ) {}
 
     public function callback(Request $request): Response
@@ -25,16 +25,12 @@ class JiraController
             'headers' => $request->headers->all()
         ]);
 
+        $data = json_decode($request->getContent(), true);
+        $this->routerService->routeTask($data);
+
         return new JsonResponse([
             'message' => 'Thanks for callback',
             'timestamp' => date('Y-m-d H:i:s')
         ], 200);
-    }
-
-    public function getTask(Request $request): Response
-    {
-        $taskKey = $request->get('taskKey');
-        $task = $this->trackerService->getTask($taskKey);
-        return new JsonResponse($task);
     }
 }

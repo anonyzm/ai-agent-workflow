@@ -8,7 +8,6 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\Controller\ContainerControllerResolver;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use App\Kernel\Kernel;
 
 // Создаем Kernel и загружаем контейнер
@@ -32,8 +31,8 @@ $resolver = new ContainerControllerResolver($container);
 // Получаем диспетчер событий из контейнера
 $dispatcher = $container->get('event_dispatcher');
 
-// Регистрируем event listeners
-//$kernel->registerEventListeners($dispatcher, $container);
+// Запускаем temporal workers
+$kernel->startWorkers();
 
 // Создаем HTTP Kernel
 $httpKernel = new HttpKernel($dispatcher, $resolver);
