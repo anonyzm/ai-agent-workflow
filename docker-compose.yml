@@ -43,8 +43,6 @@ services:
       PGDATA: /data/postgres
     volumes:
        - ./docker/jira/postgres/data:/data/postgres
-    # ports:
-    #   - "5432:5432"
     restart: unless-stopped
     networks:
       - ai-workflow-network
@@ -69,11 +67,11 @@ services:
     depends_on:
       - temporal-postgresql
     environment:
-      - DB=postgres
+      - DB=postgres12
       - DB_PORT=5432
       - POSTGRES_USER=${TEMPORAL_DB_USER}
       - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
-      - POSTGRES_SEEDS=postgresql
+      - POSTGRES_SEEDS=temporal-postgresql
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_ADDRESS=temporal:7233
       - TEMPORAL_CLI_ADDRESS=temporal:7233
@@ -111,13 +109,6 @@ services:
       - 8070:8080
 
 # =========================== Application ============================
-  init_permissions:
-    image: busybox 
-    volumes:
-      - logs_volume:/logs
-      - cache_volume:/cache
-    command: chmod -R 775 /logs && chmod -R 775 /cache
-  # PHP Application
   app:
     build:
       context: .
@@ -129,13 +120,15 @@ services:
       - cache_volume:/opt/app/cache
       - logs_volume:/opt/app/logs
     environment:
+      APP_ENV: dev
+      APP_DEBUG: true
       JIRA_BASE_URL: https://jira-nginx
       JIRA_TOKEN: ${JIRA_TOKEN}
-    depends_on:
-      - init_permissions
     networks:
       - ai-workflow-network
       - temporal-network
+    depends_on:
+      - temporal
 
 networks:
   ai-workflow-network:

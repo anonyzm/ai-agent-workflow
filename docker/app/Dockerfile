@@ -1,5 +1,10 @@
+# Берем образ для установки RoadRunner
+FROM ghcr.io/roadrunner-server/roadrunner:latest AS roadrunner
+
 # Используем официальный образ PHP 8.4 с FPM
 FROM php:8.4-fpm
+
+COPY --from=roadrunner /usr/bin/rr /usr/local/bin/rr
 
 # Устанавливаем системные зависимости
 RUN apt-get update && apt-get install -y \
@@ -37,16 +42,34 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /opt/app
 
 # Копируем конфигурацию Nginx
+COPY docker/app/nginx-main.conf /etc/nginx/nginx.conf
 COPY docker/app/nginx.conf /etc/nginx/sites-available/default
 
 # Копируем конфигурацию Supervisor
 COPY docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Копируем конфигурацию PHP-FPM
+COPY docker/app/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Создаем пользователя для приложения
 RUN groupadd --gid 1001 application 
 RUN useradd --uid 1001 --gid application --shell /bin/bash --create-home application
 RUN usermod -aG www-data application
 RUN usermod -aG application www-data
+
+# Создаем необходимые директории для supervisor
+RUN mkdir -p /var/log/supervisor
+
+# Создаем необходимые директории для nginx и php-fpm и настраиваем права
+RUN mkdir -p /var/run/nginx && chown -R application:application /var/run/nginx && chmod 755 /var/run/nginx
+RUN mkdir -p /var/run/php-fpm && chown -R application:application /var/run/php-fpm && chmod 755 /var/run/php-fpm
+RUN mkdir -p /var/log/php-fpm && chown -R application:application /var/log/php-fpm && chmod 755 /var/log/php-fpm
+RUN chown -R application:application /var/log/nginx \
+    && chown -R application:application /var/lib/nginx
+
+# Настраиваем права для roadrunner
+RUN chmod +x /usr/local/bin/rr && \
+    chown application:application /usr/local/bin/rr
 
 # Копируем composer.json и устанавливаем зависимости
 COPY app/composer.json ./

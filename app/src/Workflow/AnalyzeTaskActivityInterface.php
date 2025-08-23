@@ -4,7 +4,6 @@ namespace App\Workflow;
 
 use App\Model\Task;
 use Temporal\Activity\ActivityInterface;
-use Temporal\Activity\ActivityMethod;
 
 #[ActivityInterface]
 interface AnalyzeTaskActivityInterface

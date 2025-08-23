@@ -6,7 +6,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
-use App\Interface\TaskTrackerInterface;
+use App\Interface\TaskRouterInterface;
+use App\Model\Task;
 
 class JiraController
 {
@@ -25,12 +26,22 @@ class JiraController
             'headers' => $request->headers->all()
         ]);
 
-        $data = json_decode($request->getContent(), true);
-        $this->routerService->routeTask($data);
+        $taskData = $this->getTaskData($request);
+        $task = (new Task)->fromArray($taskData);
+        $this->routerService->routeTask($task);
 
         return new JsonResponse([
             'message' => 'Thanks for callback',
             'timestamp' => date('Y-m-d H:i:s')
         ], 200);
+    }
+
+    private function getTaskData(Request $request): array
+    {
+        $data = json_decode($request->getContent(), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \ErrorException('Failed to parse data from Jira with error: ' . json_last_error_msg());
+        }
+        return $data;
     }
 }

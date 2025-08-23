@@ -2,40 +2,44 @@
 namespace App\Service;
 
 use App\Interface\TaskTrackerInterface;
-use Psr\Log\LoggerInterface;
+use App\Interface\TaskRouterInterface;
+use App\Workflow\AnalyzeTaskWorkflowInterface;
+use Psr\Log\LoggerInterface;    
+use Temporal\Client\WorkflowClient;
+use Temporal\Client\WorkflowOptions;
+use Carbon\CarbonInterval;
+use App\Model\Task;
 
 class JiraRouterService implements TaskRouterInterface
 {
     public function __construct(
         private readonly TaskTrackerInterface $trackerService,
+        private readonly WorkflowClient $workflowClient,
         private readonly LoggerInterface $logger
     ) {}
 
-    public function routeTask(array $arrayData): void
+    public function routeTask(Task $task): void
     {
-        $this->logger->info('JiraRouterService: routeTask', ['arrayData' => $arrayData]);
+        $this->logger->info('JiraRouterService: routeTask', ['task' => $task]);
 
-        // TODO: ЗАКОНЧИЛ ТУТ, НАДО ДОДЕЛАТЬ РАБОТУ С ТЕМПОРАЛ
         $workflow = $this->workflowClient->newWorkflowStub(
-            GreetingWorkflowInterface::class,
+            AnalyzeTaskWorkflowInterface::class,
             WorkflowOptions::new()->withWorkflowExecutionTimeout(CarbonInterval::minute())
         );
 
-        $output->writeln("Starting <comment>GreetingWorkflow</comment>... ");
+        $this->logger->info('Начали анализировать таск', ['task' => $task]);
 
         // Start a workflow execution. Usually this is done from another program.
         // Uses task queue from the GreetingWorkflow @WorkflowMethod annotation.
         $run = $this->workflowClient->start($workflow, 'Antony');
 
-        $output->writeln(
-            sprintf(
+        $this->logger->info(sprintf(
                 'Started: WorkflowID=<fg=magenta>%s</fg=magenta>',
                 $run->getExecution()->getID(),
-            )
-        );
+            ));
 
         // getResult waits for workflow to complete
-        $output->writeln(sprintf("Result:\n<info>%s</info>", $run->getResult()));
-        
+        $this->logger->info('Закончили анализировать таск', ['task' => $task]);
+       
     }
 }

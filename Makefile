@@ -10,14 +10,23 @@ down:
 recreate: 
 	docker compose up -d --force-recreate
 
+recreate-app: 
+	docker compose up -d --force-recreate app
+
 ps:
 	docker compose ps
 
 bash:
 	docker compose exec --user application app bash
 
+bash-root:
+	docker compose exec app bash
+
 build:
 	docker compose build --no-cache
+
+build-app:
+	docker compose build --no-cache app
 
 rebuild:
 	docker compose down
@@ -27,11 +36,8 @@ rebuild:
 logs:
 	docker compose logs --tail 50 app
 
-clean:
+prune:
 	docker system prune -f
+	docker system prune -a
 	docker volume rm
 	docker volume prune -f
-
-prune:
-	docker compose down -v
-	docker system prune -a
