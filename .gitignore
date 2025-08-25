@@ -6,3 +6,4 @@ app/cache/*
 app/logs/*
 app/vendor/*
 .env
+docker-compose.override.yml

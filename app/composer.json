@@ -22,7 +22,8 @@
         "symfony/monolog-bundle": "^3.10",
         "guzzlehttp/guzzle": "^7.7",
         "symfony/console": "^7.3",
-        "symfony/runtime": "^7.3"
+        "symfony/runtime": "^7.3",
+        "grpc/grpc": "^1.60"
     },
     "autoload": {
         "psr-4": {

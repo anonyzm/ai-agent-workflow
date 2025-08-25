@@ -31,9 +31,6 @@ $resolver = new ContainerControllerResolver($container);
 // Получаем диспетчер событий из контейнера
 $dispatcher = $container->get('event_dispatcher');
 
-// Запускаем temporal workers
-$kernel->startWorkers();
-
 // Создаем HTTP Kernel
 $httpKernel = new HttpKernel($dispatcher, $resolver);
 

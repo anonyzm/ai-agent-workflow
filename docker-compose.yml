@@ -1,4 +1,25 @@
 services:
+# =========================== Application ============================
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    ports:
+       - "8080:80"
+    volumes:
+      - ./app:/opt/app
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      JIRA_BASE_URL: ${JIRA_BASE_URL}
+      JIRA_TOKEN: ${JIRA_TOKEN}
+      TEMPORAL_GRPC_HOST: ${TEMPORAL_GRPC_HOST}
+      TEMPORAL_GRPC_PORT: ${TEMPORAL_GRPC_PORT}
+    networks:
+      - ai-workflow-network
+      - temporal-network
+    depends_on:
+      - temporal
 # =============================== Jira ===============================
   jira-nginx:
     container_name: jira-nginx
@@ -108,28 +129,6 @@ services:
     ports:
       - 8070:8080
 
-# =========================== Application ============================
-  app:
-    build:
-      context: .
-      dockerfile: docker/app/Dockerfile
-    ports:
-       - "8080:80"
-    volumes:
-      - ./app:/opt/app
-      - cache_volume:/opt/app/cache
-      - logs_volume:/opt/app/logs
-    environment:
-      APP_ENV: dev
-      APP_DEBUG: true
-      JIRA_BASE_URL: https://jira-nginx
-      JIRA_TOKEN: ${JIRA_TOKEN}
-    networks:
-      - ai-workflow-network
-      - temporal-network
-    depends_on:
-      - temporal
-
 networks:
   ai-workflow-network:
   temporal-network:
@@ -137,5 +136,3 @@ networks:
 volumes:
   opt:
     external: false
-  cache_volume:    
-  logs_volume:

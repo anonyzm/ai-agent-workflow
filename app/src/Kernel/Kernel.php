@@ -9,9 +9,6 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\YamlFileLoader as RoutingYamlLoader;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Config\FileLocator;
-use Temporal\WorkerFactory;
-use App\Workflow\AnalyzeTaskWorkflow;
-use App\Workflow\AnalyzeTaskActivity;
 
 class Kernel extends BaseKernel
 {
@@ -70,19 +67,5 @@ class Kernel extends BaseKernel
         }
                 
         return $container;
-    }
-    
-    public function startWorkers(): void
-    {
-        // factory initiates and runs task queue specific activity and workflow workers
-        $factory = WorkerFactory::create();
-        // Worker that listens on a Task Queue and hosts both workflow and activity implementations.
-        $worker = $factory->newWorker();
-        // Workflows are stateful. So you need a type to create instances.
-        $worker->registerWorkflowTypes(AnalyzeTaskWorkflow::class);
-        // Activities are stateless and thread safe. So a shared instance is used.
-        $worker->registerActivity(AnalyzeTaskActivity::class);
-        // start primary loop
-        $factory->run();
     }
 } 

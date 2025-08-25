@@ -19,12 +19,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nginx \
     supervisor \
+    autoconf \
+    build-essential \
     && docker-php-ext-install mbstring exif pcntl bcmath gd
 
 # Устанавливаем драйверы покрытия кода
 RUN docker-php-ext-install sockets \
-    && pecl install xdebug pcov \
-    && docker-php-ext-enable xdebug pcov sockets
+    && pecl install xdebug pcov grpc \
+    && docker-php-ext-enable xdebug pcov sockets grpc
 
 # Настраиваем Xdebug для покрытия кода
 RUN echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \

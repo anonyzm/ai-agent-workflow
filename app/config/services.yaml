@@ -30,24 +30,19 @@ services:
     App\Interface\TaskRouterInterface:
         class: App\Service\JiraRouterService
         arguments:
-            - '@Temporal\Client\WorkflowClient'
             - '@App\Interface\TaskTrackerInterface'
+            - '@Temporal\Client\WorkflowClient'
             - '@logger'
 
-    # Конфигурация Temporal
     Temporal\Client\GRPC\ServiceClient:
+        factory: ['Temporal\Client\GRPC\ServiceClient', 'create']
         arguments:
-            - '%env(TEMPORAL_GRPC_HOST)%' # Host of your Temporal Service
-            - '%env(TEMPORAL_GRPC_PORT)%' # Port of your Temporal Service
-            # - null # Optional: TLS options
-            # - null # Optional: Client options
-            # - null # Optional: Context options
-            # - '%env(TEMPORAL_NAMESPACE)%' # Optional: Temporal Namespace
+            - '%env(TEMPORAL_GRPC_HOST)%:%env(TEMPORAL_GRPC_PORT)%'
 
     Temporal\Client\WorkflowClient:
+        factory: ['Temporal\Client\WorkflowClient', 'create']
         arguments:
             - '@Temporal\Client\GRPC\ServiceClient'
-            # - null # Optional: WorkflowClient options
 
     # Настройка Monolog
     monolog.logger:
