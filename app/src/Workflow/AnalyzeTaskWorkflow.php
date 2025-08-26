@@ -8,7 +8,6 @@ use Carbon\CarbonInterval;
 use Temporal\Activity\ActivityOptions;
 use Temporal\Common\RetryOptions;
 
-
 class AnalyzeTaskWorkflow implements AnalyzeTaskWorkflowInterface
 {
     private $analyzeTaskActivity;

@@ -73,8 +73,9 @@ services:
   temporal-postgresql:
     container_name: temporal-postgresql
     environment:
-      POSTGRES_PASSWORD: ${TEMPORAL_DB_USER}
-      POSTGRES_USER: ${TEMPORAL_DB_PASSWORD}
+      POSTGRES_DB: my_temporal_db
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD}
+      POSTGRES_USER: ${TEMPORAL_DB_USER}
     image: postgres:${TEMPORAL_POSTGRESQL_VERSION}
     networks:
       - temporal-network
@@ -88,14 +89,15 @@ services:
     depends_on:
       - temporal-postgresql
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=${TEMPORAL_DB_USER}
-      - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
-      - POSTGRES_SEEDS=temporal-postgresql
-      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CLI_ADDRESS=temporal:7233
+      DB: postgres12
+      DB_PORT: 5432
+      DBNAME: my_temporal_db
+      POSTGRES_USER: ${TEMPORAL_DB_USER}
+      POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD}
+      POSTGRES_SEEDS: temporal-postgresql
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CLI_ADDRESS: temporal:7233
     image: temporalio/auto-setup:${TEMPORAL_VERSION}
     networks:
       - temporal-network
@@ -109,8 +111,8 @@ services:
     depends_on:
       - temporal
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CLI_ADDRESS=temporal:7233
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CLI_ADDRESS: temporal:7233
     image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
     networks:
       - temporal-network
@@ -121,8 +123,8 @@ services:
     depends_on:
       - temporal
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: http://localhost:3000
     image: temporalio/ui:${TEMPORAL_UI_VERSION}
     networks:
       - temporal-network

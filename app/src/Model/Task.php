@@ -2,36 +2,57 @@
 
 namespace App\Model;
 
-class Task
+use App\Temporal\ArrayableInterface;
+
+class Task implements ArrayableInterface
 {
     public function __construct(
+        public string $id = '',
         public string $key = '',
         public string $title = '',
         public string $description = '',
-        public string $status = '',
-        public array $tags = []
+        public array $tags = [],
+        public ?TaskType $type = null,
+        public ?TaskUser $creator = null,
+        public ?TaskUser $assignee = null,
+        public ?TaskProject $project = null,
+        public ?TaskStatus $status = null
     ) {}
 
     public function fromArray(array $data): self
     {
-        // TODO: Реализовать метод
         return new self(
-            'TEST-1',
-            'This is a test task',
-            'This is a test description',
-            'todo',
-            ['my-test-tag', 'my-test-tag2']
+            $data['issue']['id'] ?? '',
+            $data['issue']['key'] ?? '',
+            $data['issue']['fields']['summary'] ?? '',
+            $data['issue']['fields']['description'] ?? '',
+            $data['issue']['fields']['labels'] ?? [],
+            (new TaskType())->fromArray($data['issue']['fields']['issuetype']),
+            (new TaskUser())->fromArray($data['user']),
+            (new TaskUser())->fromArray($data['user']),
+            (new TaskProject())->fromArray($data['issue']['fields']['project']),
+            (new TaskStatus())->fromArray($data['issue']['fields']['status'])
         );
+    }
+
+    public function mock(): self
+    {
+        return $this->fromArray(json_decode(file_get_contents(dirname(__DIR__) . '/Tests/Seed/new_task.json'), true));
     }
 
     public function toArray(): array
     {
         return [
+            'id' => $this->id,
             'key' => $this->key,
             'title' => $this->title,
             'description' => $this->description,
-            'status' => $this->status,
-            'tags' => $this->tags
+            'tags' => $this->tags,
+            'type' => $this->type->toArray(),
+            'creator' => $this->creator->toArray(),
+            'assignee' => $this->assignee->toArray(),
+            'project' => $this->project->toArray(),
+            'status' => $this->status->toArray(),
         ];
     }
 }
