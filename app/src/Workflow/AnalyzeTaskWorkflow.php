@@ -18,7 +18,7 @@ class AnalyzeTaskWorkflow implements AnalyzeTaskWorkflowInterface
             AnalyzeTaskActivityInterface::class,
             ActivityOptions::new()
                 ->withStartToCloseTimeout(CarbonInterval::seconds(2))
-                ->withRetryOptions(RetryOptions::new()->withMaximumAttempts(1))
+//                ->withRetryOptions(RetryOptions::new()->withMaximumAttempts(1))
         );
     }
 

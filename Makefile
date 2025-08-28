@@ -23,10 +23,10 @@ bash-root:
 	docker compose exec app bash
 
 build:
-	docker compose build --no-cache
+	docker compose build
 
 build-app:
-	docker compose build --no-cache app
+	docker compose build app
 
 rebuild:
 	docker compose down

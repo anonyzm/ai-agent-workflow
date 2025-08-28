@@ -2,20 +2,16 @@
 <?php
 
 use Temporal\WorkerFactory;
-use App\Kernel\Kernel;
 use Temporal\DataConverter\DataConverter;
 use Temporal\DataConverter\NullConverter;
 use Temporal\DataConverter\BinaryConverter;
-use App\Temporal\DeclarationLocator;
+use App\Temporal\WorkflowActivityLocator;
+use Temporal\Worker\FeatureFlags;
 
 require __DIR__.'/../vendor/autoload.php';
 ini_set('display_errors', 'stderr');
 
-$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
-$kernel->boot();
-
-// Получаем контейнер
-$container = $kernel->getContainer();
+FeatureFlags::$workflowDeferredHandlerStart = true;
 
 // factory initiates and runs task queue specific activity and workflow workers
 $factory = WorkerFactory::create(new DataConverter(
@@ -27,7 +23,7 @@ $factory = WorkerFactory::create(new DataConverter(
 // Worker that listens on a Task Queue and hosts both workflow and activity implementations.
 $worker = $factory->newWorker();
 
-$declarations = DeclarationLocator::create(dirname(__DIR__) . '/src/Workflow/');
+$declarations = WorkflowActivityLocator::create(dirname(__DIR__) . '/src/Workflow/');
 
 foreach ($declarations->getWorkflowTypes() as $workflowType) {
     // Workflows are stateful. So you need a type to create instances.

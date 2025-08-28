@@ -35,7 +35,7 @@ class JiraRouterService implements TaskRouterInterface
             WorkflowOptions::new()->withWorkflowExecutionTimeout(CarbonInterval::minute())
         );
 
-        $this->logger->info('Начали анализировать таск', ['task' => $task]);
+        $this->logger->info('[routeTask:begin]', ['task' => $task]);
 
         // Start a workflow execution. Usually this is done from another program.
         // Uses task queue from the GreetingWorkflow @WorkflowMethod annotation.
@@ -47,7 +47,7 @@ class JiraRouterService implements TaskRouterInterface
             ));
 
         // getResult waits for workflow to complete
-        $this->logger->info('Закончили анализировать таск', ['task' => $task]);
+        $this->logger->info('[routeTask:end]', ['task' => $task]);
        
     }
 

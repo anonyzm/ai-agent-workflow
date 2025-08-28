@@ -2,14 +2,12 @@
 
 namespace App\Controller;
 
-use App\Temporal\JsonConverter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Psr\Log\LoggerInterface;
 use App\Interface\TaskRouterInterface;
 use App\Model\Task;
-use Temporal\DataConverter\DataConverter;
 
 class JiraController
 {

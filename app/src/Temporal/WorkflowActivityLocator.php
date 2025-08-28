@@ -2,14 +2,10 @@
 
 namespace App\Temporal;
 
-use Spiral\Tokenizer\ClassesInterface;
-use Spiral\Tokenizer\ClassLocator;
-use Symfony\Component\Finder\Finder;
+use App\Kernel\DeclarationLocator;
 
-class DeclarationLocator
+class WorkflowActivityLocator extends DeclarationLocator
 {
-    private ClassesInterface $classLocator;
-
     /**
      * Finds all activity declarations using Activity suffix.
      *
@@ -38,20 +34,7 @@ class DeclarationLocator
         }
     }
 
-    /**
-     * @return \Generator|\ReflectionClass[]
-     */
-    private function getAvailableDeclarations(): \Generator
-    {
-        foreach ($this->classLocator->getClasses() as $class) {
-            if ($class->isAbstract() || $class->isInterface()) {
-                continue;
-            }
-
-            yield $class;
-        }
-    }
-
+    
     /**
      * @param string $haystack
      * @param string $needle
@@ -65,20 +48,4 @@ class DeclarationLocator
         }
         return substr($haystack, -$length) === $needle;
     }
-
-    /**
-     * @param string $dir
-     * @return $this
-     */
-    public static function create(string $dir): self
-    {
-        $locator = new self();
-        $locator->classLocator = new ClassLocator(
-            Finder::create()->files()->in($dir)
-        );
-
-        return $locator;
-    }
-
-
 }

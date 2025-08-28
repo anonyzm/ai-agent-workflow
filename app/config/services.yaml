@@ -10,6 +10,19 @@ services:
     event_dispatcher:
         class: Symfony\Component\EventDispatcher\EventDispatcher
         public: true
+
+    # Регистрируем консольные команды
+    App\Command\:
+        resource: '../src/Command/'
+        public: true
+        tags: ['console.command']
+
+    App\Command\TestCommand:
+        class: App\Command\TestCommand
+        public: true
+        arguments:
+            - '@App\Interface\TaskRouterInterface'
+        tags: ['console.command']
     
     # Регистрируем все контроллеры как публичные сервисы
     App\Controller\:
@@ -17,6 +30,7 @@ services:
         public: true
         tags: ['controller.service_arguments']
 
+    # Регистрируем сервисы 
     App\Service\:
         resource: '../src/Service/'  
 

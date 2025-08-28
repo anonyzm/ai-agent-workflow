@@ -5,6 +5,7 @@ namespace App\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\YamlFileLoader as RoutingYamlLoader;
 use Symfony\Component\Routing\RouteCollection;
@@ -67,5 +68,13 @@ class Kernel extends BaseKernel
         }
                 
         return $container;
+    }
+
+    /**
+     * Определяем, запущено ли приложение в консольном режиме
+     */
+    public function isConsole(): bool
+    {
+        return PHP_SAPI === 'cli';
     }
 } 
