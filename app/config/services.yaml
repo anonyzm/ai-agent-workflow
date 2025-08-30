@@ -6,11 +6,6 @@ services:
         autoconfigure: true
         public: false
 
-    # Event dispatcher
-    event_dispatcher:
-        class: Symfony\Component\EventDispatcher\EventDispatcher
-        public: true
-
     # Регистрируем консольные команды
     App\Command\:
         resource: '../src/Command/'
@@ -33,7 +28,22 @@ services:
     # Регистрируем сервисы 
     App\Service\:
         resource: '../src/Service/'  
+    
+    # Явно регистрируем логгер как сервис
+    Psr\Log\LoggerInterface: '@monolog.logger'      
 
+    # Регистрируем сервисы Temporal
+    Temporal\Client\GRPC\ServiceClient:
+        factory: ['Temporal\Client\GRPC\ServiceClient', 'create']
+        arguments:
+            - '%env(TEMPORAL_GRPC_HOST)%:%env(TEMPORAL_GRPC_PORT)%'
+
+    Temporal\Client\WorkflowClient:
+        factory: ['Temporal\Client\WorkflowClient', 'create']
+        arguments:
+            - '@Temporal\Client\GRPC\ServiceClient'
+
+    # Регистрируем сервисы приложения
     App\Interface\TaskTrackerInterface:
         class: App\Service\JiraService
         arguments:
@@ -48,41 +58,6 @@ services:
             - '@Temporal\Client\WorkflowClient'
             - '@logger'
 
-    Temporal\Client\GRPC\ServiceClient:
-        factory: ['Temporal\Client\GRPC\ServiceClient', 'create']
-        arguments:
-            - '%env(TEMPORAL_GRPC_HOST)%:%env(TEMPORAL_GRPC_PORT)%'
 
-    Temporal\Client\WorkflowClient:
-        factory: ['Temporal\Client\WorkflowClient', 'create']
-        arguments:
-            - '@Temporal\Client\GRPC\ServiceClient'
-
-    # Настройка Monolog
-    monolog.logger:
-        class: Monolog\Logger
-        arguments:
-            - 'app'
-        calls:
-            - method: pushHandler
-              arguments: ['@monolog.handler.main']
-            - method: pushHandler
-              arguments: ['@monolog.handler.error']
-            - method: pushHandler
-              arguments: ['@monolog.handler.console']
-
-    monolog.handler.main:
-        class: Monolog\Handler\StreamHandler
-        arguments:
-            - '%kernel.logs_dir%/app.log'
-            - !php/const Monolog\Logger::DEBUG
-
-    monolog.handler.error:
-        class: Monolog\Handler\StreamHandler
-        arguments:
-            - '%kernel.logs_dir%/error.log'
-            - !php/const Monolog\Logger::ERROR
-
-    # Явно регистрируем логгер как сервис
-    Psr\Log\LoggerInterface: '@monolog.logger'        
+      
     
